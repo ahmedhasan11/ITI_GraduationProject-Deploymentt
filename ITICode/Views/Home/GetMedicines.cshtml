@@ -1,0 +1,79 @@
+﻿@model IEnumerable<ITI_Hackathon.ServiceContracts.DTO.MedicineListDto>
+
+<style>
+    .Empty{
+        width: 100%;
+        height: 80px;
+    }
+</style>
+  
+<div class="Empty"></div>
+<div class="container mt-5 mb-5">
+    <!-- Page Header -->
+    <div class="page-header text-center mb-5">
+        <h2>MEDICINES</h2>
+        <p>
+            Discover our carefully selected range of high-quality medicines for your health needs. All products are
+            sourced from trusted manufacturers.
+        </p>
+    </div>
+
+    <!-- Medicines Grid -->
+    <div class="row g-4">
+        @foreach (var m in Model)
+        {
+            <!-- Medicine Card -->
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="medicine-card h-100">
+                    <!-- Medicine Image -->
+                    <div class="card-img-container">
+                        <img src="@m.ImageUrl"
+                             alt="@m.Name"
+                             class="w-100"
+                             loading="lazy">
+                        <div class="card-overlay"></div>
+                        <span class="category-badge">@m.Category</span>
+                    </div>
+
+                    <!-- Medicine Body -->
+                    <div class="card-body text-center">
+                        <!-- Name -->
+                        <h5 class="medicine-name">
+                            <a href="@Url.Action("Details", "Medicine", new { id = m.Id })">
+                                @m.Name
+                            </a>
+                        </h5>
+
+                        <!-- Stock Badge -->
+                        @if (m.Stock > 0)
+                        {
+                            <span class="stock-badge in-stock">In Stock</span>
+                        }
+                        else
+                        {
+                            <span class="stock-badge out-of-stock">Out of Stock</span>
+                        }
+
+                        <!-- Price -->
+                        <div class="price-container">
+                            <span class="current-price">$@m.Price</span>
+                            @* Optional original price if you have discounts *@
+                            <span class="original-price">$@m.Price</span>
+                        </div>
+
+                        <!-- Add to Cart -->
+                        <a href="@Url.Action("AddToCart", "Cart", new { id = m.Id })"
+                           class="btn btn-sm btn-success add-to-cart-btn mt-2">
+                            <i class="fa fa-cart-plus"></i> Add to Cart
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- See More -->
+@*     <div class="text-center mt-4">
+        <a href="@Url.Action("Index", "Medicine")" class="see-more-btn">See More Medicines</a>
+    </div> *@
+</div>

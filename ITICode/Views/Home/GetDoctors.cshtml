@@ -1,0 +1,151 @@
+﻿@using ITI_Hackathon.ServiceContracts.DTO
+@using ITI_Hackathon.ServiceContracts
+@model IEnumerable<DoctorApprovedDTO>
+@inject IConsultationService ConsultationService
+@using System.Security.Claims
+@using ITI_Hackathon.Entities
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "Doctors Page";
+    var userId = UserManager.GetUserId(User);
+}
+
+
+<style>
+    .Empty {
+        width: 100%;
+        height: 80px;
+    }
+</style>
+
+<div class="Empty"></div>
+<div class="container mt-5 mb-5">
+    <!-- Page Header -->
+    <div class="page-header text-center mb-5">
+        <h2>OUR DOCTORS</h2>
+        <p>
+            Connect with highly qualified medical professionals for personalized consultations and expert care.
+        </p>
+    </div>
+
+    <!-- Doctors Grid -->
+    <div class="row g-4">
+        @foreach (var d in Model)
+        {
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="doctor-card h-100">
+                    <div class="doctor-image-container">
+                        <img src="~/assets/images/user/avatar-1.jpg"
+                             alt="@d.FullName"
+                             class="doctor-image"
+                             loading="lazy">
+                    </div>
+
+                    <div class="doctor-card-body">
+                        <!-- Doctor Name -->
+                        <h5 class="doctor-name">
+                            <a asp-controller="Home"
+                               asp-action="DoctorDetails"
+                               asp-route-userId="@d.UserId">
+                                @d.FullName
+                            </a>
+                        </h5>
+
+                        <!-- Contact Info -->
+                        <div class="doctor-contact small">
+                            <div><i class="fas fa-envelope me-2"></i> @d.Email</div>
+                            <div><i class="fas fa-phone me-2"></i> 01002211345</div>
+                        </div>
+
+                        <!-- Specialty & Price -->
+                        <span class="doctor-specialty">@d.Specialty</span>
+                        <span class="consultation-price">Consultation: $10</span>
+
+                        <!-- Bio -->
+                        <p class="doctor-bio small">
+                            @(string.IsNullOrEmpty(d.Bio) ? "No bio provided." : d.Bio)
+                        </p>
+
+                        <!-- Rating -->
+                        <div class="rating">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= 4)   // example: 4 stars rating
+                                {
+                                    <i class="fa-solid fa-star text-warning"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa-solid fa-star text-warning" style="opacity:0.3;"></i>
+                                }
+                            }
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <a asp-controller="Home"
+                               asp-action="DoctorDetails"
+                               asp-route-userId="@d.UserId"
+                               class="btn-book">
+                                <i class="fa-solid fa-calendar-check me-1"></i> Book
+                            </a>
+
+                            @{
+                                var patientId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                                bool hasPaid = await ConsultationService.HasPaidForConsultationAsync(patientId, d.UserId);
+                            }
+
+                            @if (hasPaid)
+                            {
+                                <button class="btn-chat start-chat-btn"
+                                        data-doctor-id="@d.UserId">
+                                    <i class="fa-solid fa-comments me-1"></i> Chat Now
+                                </button>
+                            }
+                            else
+                            {
+                                <form asp-controller="Payment" asp-action="CreateConsultationCheckout" method="post" class="d-inline flex-grow-1">
+                                    <input type="hidden" name="doctorId" value="@d.UserId" />
+                                    <button type="submit" class="btn-chat">
+                                        <i class="fa-solid fa-comments me-1"></i> Chat ($50)
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.start-chat-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            const doctorId = btn.dataset.doctorId;
+
+            const res = await fetch('/api/Chat/GetOrCreateThread', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    patientId: '@UserManager.GetUserId(User)',
+                    doctorId: doctorId
+                })
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                window.location.href = `/ChatPage/Index?threadId=${data.thread.id}`;
+            } else {
+                alert("Something went wrong while starting the chat.");
+            }
+        });
+    });
+</script>
+
+@Html.AntiForgeryToken()

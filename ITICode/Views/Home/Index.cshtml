@@ -1,0 +1,291 @@
+﻿@using ITI_Hackathon.ServiceContracts
+@model ITI_Hackathon.Models.HomeIndexViewModel
+@inject IConsultationService ConsultationService
+
+@using System.Security.Claims
+@using ITI_Hackathon.Entities
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@{
+    ViewData["Title"] = "Home Page";
+    var userId = UserManager.GetUserId(User);
+}
+
+<!-- Hero Slider -->
+<div class="hero-slider">
+    <!-- Slide 1: Medicines -->
+    <div class="slide slide-1 active">
+        <div class="slide-content">
+            <h1>Your Medicines Way</h1>
+            <p>
+                Browse our extensive catalog of medicines and healthcare
+                products with detailed information and competitive prices.
+            </p>
+            <a asp-controller="Home" asp-action="GetMedicines" class="btn-hero">Buy Now</a>
+        </div>
+    </div>
+
+    <!-- Slide 2: Doctor Consultation -->
+    <div class="slide slide-2">
+        <div class="slide-content">
+            <h1>Consult with Expert Doctors</h1>
+            <p>
+                Get professional medical advice from certified doctors and specialists through secure online
+                consultations.
+            </p>
+            <a asp-controller="Home" asp-action="GetDoctors" class="btn-hero">Book & Chat</a>
+        </div>
+    </div>
+
+    <!-- Slide 3: AI Assistant -->
+    <div class="slide slide-3">
+        <div class="slide-content">
+            <h1>AI-Powered Medical Assistant</h1>
+            <p>
+                Chat with our intelligent AI assistant to get instant answers to your health-related questions
+                anytime.
+            </p>
+            <a asp-controller="Home" asp-action="Index" class="btn-hero">Talk To AI</a>
+        </div>
+    </div>
+
+    <div class="slider-controls">
+        <div class="slider-dot active" data-slide="0"></div>
+        <div class="slider-dot" data-slide="1"></div>
+        <div class="slider-dot" data-slide="2"></div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<section class="features py-5" id="features">
+    <div class="container">
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8">
+                <h2 class="text-center">Our Premium Features</h2>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card h-100 d-flex flex-column align-items-center text-center">
+                    <i class="fa-solid fa-pills mb-3"></i>
+                    <h5 class="mb-3">Medicines</h5>
+                    <p class="flex-grow-1">
+                        Browse a wide range of medicines and health products with detailed
+                        information and
+                        competitive prices.
+                    </p>
+                    <a asp-controller="Home" asp-action="GetMedicines" class="btn-premium mt-auto">Explore Medicines</a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card h-100 d-flex flex-column align-items-center text-center">
+                    <i class="fa-solid fa-user-md mb-3"></i>
+                    <h5 class="mb-3">Doctor Consultation</h5>
+                    <p class="flex-grow-1">
+                        Get professional medical advice from certified doctors and specialists
+                        through secure online
+                        Chat.
+                    </p>
+                    <a asp-controller="Home" asp-action="GetDoctors" class="btn-premium mt-auto">Find Doctors</a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card h-100 d-flex flex-column align-items-center text-center">
+                    <i class="fa-solid fa-robot mb-3"></i>
+                    <h5 class="mb-3">AI Assistant</h5>
+                    <p class="flex-grow-1">
+                        Chat with our intelligent AI assistant to get instant answers to your
+                        health-related
+                        questions.
+                    </p>
+                    <button class="btn-premium mt-auto">Talk to AI</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container mt-5 mb-5">
+    <!-- Page Header -->
+    <div class="page-header text-center mb-5">
+        <h2>MEDICINES</h2>
+        <p>
+            Discover our carefully selected range of high-quality medicines for your health needs. All products are
+            sourced from trusted manufacturers.
+        </p>
+    </div>
+
+    <!-- Medicines Grid -->
+    <div class="row g-4">
+        @foreach (var m in Model.Medicines)
+        {
+            <!-- Medicine Card -->
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="medicine-card h-100">
+                    <div class="card-img-container">
+                        <img src="@m.ImageUrl"
+                        alt="Paracetamol" class="w-100" loading="lazy">
+                        <div class="card-overlay"></div>
+                        <span class="category-badge">@m.Category</span>
+                    </div>
+                    <div class="card-body text-center">
+                        <h5 class="medicine-name">
+                            <a href="#">@m.Name</a>
+                        </h5>
+                        <!-- Stock Badge -->
+                        @if (m.Stock > 0)
+                        {
+                            <span class="stock-badge in-stock">In Stock</span>
+                        }
+                        else
+                        {
+                            <span class="stock-badge out-of-stock">Out of Stock</span>
+                        }
+                            <div class="price-container">
+                            <span class="current-price">$@m.Price</span>
+                            <span class="original-price">
+                                $10.00
+                            </span>
+                        </div>
+                        <!-- Add to Cart -->
+                        <button class="btn btn-sm btn-success add-to-cart-btn"
+                                data-medicine-id="@m.Id">
+                            <i class="fa fa-cart-plus"></i> Add to Cart
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<a asp-controller="Home" asp-action="GetMedicines" class="see-more-btn">See More Medicines</a>
+
+
+<div class="container mt-5 mb-5">
+    <input type="hidden" id="currentUserId" value="@UserManager.GetUserId(User)" />
+    <!-- Page Header -->
+    <div class="page-header text-center mb-5">
+        <h2>DOCTORS</h2>
+        <p>
+            Connect with our team of highly qualified medical professionals for personalized consultations
+            and expert care.
+        </p>
+    </div>
+
+    <!-- Doctors Grid -->
+    <div class="row g-4">
+    @foreach (var d in Model.Doctors)
+{
+        <!-- Doctor Card 1 -->
+        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+            <div class="doctor-card h-100">
+                <div class="doctor-image-container">
+                        <img src="~/assets/images/user/avatar-1.jpg"
+                         alt="Dr. Sarah Johnson" class="doctor-image" loading="lazy">
+                </div>
+
+                <div class="doctor-card-body">
+                    <h5 class="doctor-name">
+                        <a asp-controller="Home" asp-action="DoctorDetails" asp-route-userId="@d.UserId">@d.FullName</a>
+                    </h5>
+
+                    <div class="doctor-contact small">
+                        <div><i class="fas fa-envelope me-2"></i> @d.Email</div>
+                        <div><i class="fas fa-phone me-2"></i> 01002211345</div>
+                    </div>
+
+                    <span class="doctor-specialty">@d.Specialty</span>
+
+                    <span class="consultation-price">Appointment: $10</span>
+
+                    <p class="doctor-bio small">
+                        @d.Bio
+                    </p>
+
+                    <div class="rating">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= 4)   // example: 4 stars rating
+                            {
+                                <i class="fa-solid fa-star text-warning"></i>
+                            }
+                            else
+                            {
+                               <i class="fa-solid fa-star text-warning" style="opacity:0.3;"></i>
+                            }
+                        }
+                    </div>
+
+                    <div class="action-buttons">
+                            <a asp-controller="Home"
+                               asp-action="DoctorDetails"
+                               asp-route-userId="@d.UserId"
+                               class="btn-book">
+                                <i class="fa-solid fa-calendar-check me-1"></i> Book
+                            </a>
+                            @{
+                                var patientId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                                bool hasPaid = await ConsultationService.HasPaidForConsultationAsync(patientId, d.UserId);
+                            }
+
+                            @if (hasPaid)
+                            {
+                                <button class="btn btn-success btn-sm flex-grow-1 rounded-pill shadow-sm start-chat-btn"
+                                        data-doctor-id="@d.UserId">
+                                    <i class="fa-solid fa-comments me-1"></i> Chat Now
+                                </button>
+                            }
+                            else
+                            {
+                                <form asp-controller="Payment" asp-action="CreateConsultationCheckout" method="post" class="d-inline flex-grow-1">
+                                    <input type="hidden" name="doctorId" value="@d.UserId" />
+                                    <button type="submit" class="btn-chat">
+                                        <i class="fa-solid fa-comments me-1"></i> Chat ($50)
+                                    </button>
+                                </form>
+                            }
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        }
+</div>
+    <a asp-controller="Home" asp-action="GetDoctors" class="see-more-btn">See More Doctors</a>
+
+</div>
+<script>
+    document.querySelectorAll('.start-chat-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            const patientId = document.getElementById('currentUserId').value;
+            const doctorId = btn.dataset.doctorId;
+
+            console.log("Sending:", { patientId, doctorId }); // Debugging
+
+            const res = await fetch('/api/Chat/GetOrCreateThread', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ patientId, doctorId })
+            });
+
+            const data = await res.json();
+            console.log("Response:", data); // Debugging
+
+            if (data.success) {
+                window.location.href = `/ChatPage/Index?threadId=${data.thread.id}`;
+            } else {
+                alert(data.message ?? "Something went wrong while starting the chat.");
+            }
+        });
+    });
+</script>
+
+
+
+@Html.AntiForgeryToken()
+
+
